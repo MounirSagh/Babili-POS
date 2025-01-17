@@ -6,6 +6,8 @@ import NotFound from './pages/NotFound';
 import Payment from './pages/Payment';
 import Success from './pages/Success';
 import Initial from './pages/Initial';
+import DayEndSummary from './components/DayEndSummary';
+import Reports from './components/Reports';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/day-end" element={<DayEndSummary />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

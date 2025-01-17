@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
+interface OrderResponse {
+  id: string;
+  totalPrice: number;
+  paymentMethod: string;
+}
 
 function Method({ cart }: any) {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
@@ -27,16 +35,62 @@ function Method({ cart }: any) {
     });
   };
 
-  const handlevalidate = () => {
-    navigate('/success')
-  }
+  const handlevalidate = async () => {
+    try {
+      const orderData = {
+        userDetails: {
+          userId: "pos-user",
+          firstName: "POS",
+          lastName: "Sale",
+          email: "pos@example.com",
+          phone: "N/A",
+          city: "N/A",
+          address: "N/A",
+          postalCode: "N/A",
+          country: "N/A"
+        },
+        cartItems: cart.map((item: any) => ({
+          productId: item._id,
+          quantity: item.quantity,
+          REF: item.REF,
+          price: item.price,
+          attributes: item.attributes || [],
+          subcategoryID: item.subcategoryID?._id
+        })),
+        totalPrice: total,
+        paymentMethod: paymentMethod,
+        status: "Approved",
+        date: new Date()
+      };
+
+      const response = await axios.post<OrderResponse>('http://localhost:3000/api/order/create', orderData);
+      
+      // Clear the cart after successful order
+      // You'll need to add setCart to your props
+      // setCart([]);
+      
+      navigate('/success', { 
+        state: { 
+          orderId: response.data.id,
+          total: total,
+          paymentMethod: paymentMethod,
+          change: paymentMethod === 'cash' ? calculateChange() : 0
+        } 
+      });
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
 
   const isPaymentValid = parseFloat(cash) >= total || paymentMethod === 'card';
 
   return (
-    <div className="relative p-4 border rounded-md shadow-sm bg-gray-50 h-[750px]">
+    <div className="p-4 border rounded-md shadow-sm bg-gray-50 h-[750px] flex flex-col">
+      {/* Header */}
       <h2 className="text-xl font-semibold mb-4">Select Payment Method</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+
+      {/* Payment Method Selection */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         {/* Cash Card */}
         <div
           onClick={() => setPaymentMethod('cash')}
@@ -45,7 +99,7 @@ function Method({ cart }: any) {
           }`}
         >
           <h3 className="text-lg font-medium">Cash</h3>
-          <p className="text-gray-600">Pay with cash and get change if needed.</p>
+          <p className="text-sm text-gray-600">Pay with cash and get change if needed.</p>
         </div>
 
         {/* Card Payment Card */}
@@ -56,33 +110,38 @@ function Method({ cart }: any) {
           }`}
         >
           <h3 className="text-lg font-medium">Card</h3>
-          <p className="text-gray-600">Pay with your credit or debit card.</p>
+          <p className="text-sm text-gray-600">Pay with your credit or debit card.</p>
         </div>
       </div>
 
-      {/* Conditional Rendering for Cash */}
+      {/* Cash Payment Interface */}
       {paymentMethod === 'cash' && (
-        <div>
-          <div className="mb-4">
-            <label className="block mb-2 text-gray-700">Cash Received:</label>
-            <input
-              type="text"
-              value={`${cash} MAD`}
-              readOnly
-              className="w-full p-3 border rounded-md bg-gray-100 text-xl text-center shadow-sm"
-            />
+        <div className="flex-1 flex flex-col mb-16">  {/* Added margin bottom */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Cash Input */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">Cash Received:</label>
+              <input
+                type="text"
+                value={`${cash} MAD`}
+                readOnly
+                className="w-full p-3 border rounded-md bg-gray-100 text-lg text-center shadow-sm"
+              />
+            </div>
+            {/* Change Display */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">Change:</label>
+              <input
+                type="text"
+                value={`${calculateChange().toFixed(2)} MAD`}
+                readOnly
+                className="w-full p-3 border rounded-md bg-gray-100 text-lg text-center shadow-sm"
+              />
+            </div>
           </div>
-          <div className="mb-4">
-            <label className="block mb-2 text-gray-700">Change:</label>
-            <input
-              type="text"
-              value={`${calculateChange().toFixed(2)} MAD`}
-              readOnly
-              className="w-full p-3 border rounded-md bg-gray-100 text-xl text-center shadow-sm"
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {/* Number Buttons */}
+
+          {/* Number Pad */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
             {[...Array(9)].map((_, index) => (
               <button
                 key={index + 1}
@@ -114,18 +173,24 @@ function Method({ cart }: any) {
         </div>
       )}
 
-      {/* Placeholder for Card Payment */}
+      {/* Card Payment Message */}
       {paymentMethod === 'card' && (
-        <p className="text-gray-500">
-          <span className="font-medium">Card payment selected.</span> Proceed to the next step for card processing.
-        </p>
+        <div className="flex-1 flex items-center justify-center mb-4">
+          <p className="text-gray-500 text-center text-lg">
+            <span className="font-medium">Card payment selected.</span>
+            <br />
+            Proceed to the next step for card processing.
+          </p>
+        </div>
       )}
 
-      {/* Validate Payment Button */}
-      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+      {/* Fixed "Validate Payment" Button */}
+      <div className="fixed bottom-4 left-2/3 transform -translate-x-1/2 w-full max-w-[400px]">
         <button
-          className={`p-4 rounded-md shadow-lg text-lg font-semibold ${
-            isPaymentValid ? 'bg-blue-800 text-white hover:bg-blue-900' : 'bg-blue-100 text-gray-500 cursor-not-allowed'
+          className={`w-full py-4 rounded-md shadow-lg text-lg font-semibold ${
+            isPaymentValid
+              ? 'bg-blue-800 text-white hover:bg-blue-900'
+              : 'bg-blue-100 text-gray-500 cursor-not-allowed'
           }`}
           onClick={handlevalidate}
           disabled={!isPaymentValid}
