@@ -32,65 +32,76 @@ function Cart({ cart, updateQuantity }: any) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 ">
+    <div className="bg-white shadow-md rounded-lg p-4">
       {cart.length === 0 ? (
-        <p className="flex items-center justify-center text-gray-500 h-[650px]">Start Adding Products.</p>
+        <p className="flex items-center justify-center text-gray-500 h-[600px]">Start Adding Products.</p>
       ) : (
         <>
-          <div className="space-y-4 h-[475px]">
+          <div className="space-y-2 h-[380px] overflow-y-auto">
             {currentItems.map((item: any) => (
-              <div key={item.id} className="flex space-x-4 pb-4 border-b">
-                <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+              <div key={item._id} className="flex space-x-2 pb-2 border-b">
+                <img 
+                  src={item.subcategoryID?.image || '/placeholder.png'}
+                  alt={item.REF} 
+                  className="w-10 h-10 object-cover rounded"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.png';
+                  }}
+                />
                 <div className="flex-grow">
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-sm text-gray-600">Price: {item.price} MAD</p>
-                  <div className="flex items-center gap-2 mt-2 text-gray-600">
-                    <p className="text-sm text-gray-600">Quantity: </p>
+                  <h3 className="font-semibold text-sm">{item.name}</h3>
+                  <p className="text-xs text-gray-600">Price: {item.price} MAD</p>
+                  <div className="flex items-center gap-1 mt-1 text-gray-600">
+                    <p className="text-xs text-gray-600">Quantity: </p>
                     <button
-                      className="px-2 py-1 bg-gray-200 rounded"
-                      onClick={() => updateQuantity(item.id, -1)}
+                      className="px-1.5 py-0.5 bg-gray-200 rounded text-sm"
+                      onClick={() => updateQuantity(item._id, -1)}
                     >
                       -
                     </button>
-                    <h1>{item.quantity}</h1>
+                    <span className="text-sm">{item.quantity}</span>
                     <button
-                      className="px-2 py-1 bg-gray-200 rounded"
-                      onClick={() => updateQuantity(item.id, 1)}
+                      className="px-1.5 py-0.5 bg-gray-200 rounded text-sm"
+                      onClick={() => updateQuantity(item._id, 1)}
                     >
                       +
                     </button>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold">{item.quantity * item.price} MAD</p>
+                  <p className="font-semibold text-sm">{item.quantity * item.price} MAD</p>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 flex justify-between items-center">
+          <div className="mt-2 flex justify-between items-center text-sm">
             <button
-              className="px-4 py-2 bg-blue-800 rounded disabled:opacity-50 text-white"
+              className="px-2 py-1 bg-blue-800 rounded disabled:opacity-50 text-white text-sm"
               onClick={handlePrevious}
               disabled={currentPage === 1}
             >
               Previous
             </button>
-            <span>
+            <span className="text-sm">
               Page {currentPage} of {totalPages}
             </span>
             <button
-              className="px-4 py-2 bg-blue-800 rounded disabled:opacity-50 text-white"
+              className="px-2 py-1 bg-blue-800 rounded disabled:opacity-50 text-white text-sm"
               onClick={handleNext}
               disabled={currentPage === totalPages}
             >
               Next
             </button>
           </div>
-          <div className="mt-6 flex justify-between items-center">
-            <h3 className="text-xl font-bold">Total:</h3>
-            <p className="text-2xl font-bold text-blue-800">{totalPrice} MAD</p>
+          <div className="mt-3 flex justify-between items-center">
+            <h3 className="text-lg font-bold">Total:</h3>
+            <p className="text-xl font-bold text-blue-800">{totalPrice} MAD</p>
           </div>
-          <button className="mt-6 w-full bg-blue-800 text-white py-2 px-4 rounded-md hover:bg-blue-900 transition-colors" onClick={() => navigate('/payment', { state: { cart } })}>
+          <button 
+            className="mt-3 w-full bg-blue-800 text-white py-2 px-4 rounded-md hover:bg-blue-900 transition-colors text-sm"
+            onClick={() => navigate('/payment', { state: { cart } })}
+          >
             Proceed to Payment
           </button>
         </>

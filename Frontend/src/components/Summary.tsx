@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 
 function Summary({ cart }: any) {
-  const itemsPerPage = 15; // Items per page
+  const itemsPerPage = 15;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(cart.length / itemsPerPage);
 
   const total = cart.reduce((acc: any, item: any) => acc + item.price * item.quantity, 0);
-
-  // Get current page items
   const currentItems = cart.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePageChange = (direction: 'prev' | 'next') => {
@@ -22,22 +20,53 @@ function Summary({ cart }: any) {
     <div className="p-4 border rounded-md shadow-lg bg-white h-[750px] overflow-hidden">
       <h2 className="text-2xl font-bold mb-4 text-center text-blue-800">Order Summary</h2>
       
-      <div className="space-y-4 h-[600px] overflow-y-auto">
+      <div className="space-y-4 h-[480px] overflow-y-auto">
         {currentItems.map((item: any) => (
           <div
-            key={item.id}
-            className="flex justify-between items-center p-3 border rounded-md bg-blue-100 shadow-sm hover:bg-gray-200"
+            key={item._id}
+            className="flex justify-between p-3 border rounded-md bg-blue-50 shadow-sm hover:bg-blue-100 transition-colors"
           >
-            <div>
-              <p className="font-medium text-gray-800">{item.name}</p>
-              <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={item.subcategoryID?.image || '/placeholder.png'}
+                  alt={item.REF} 
+                  className="w-12 h-12 object-cover rounded"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.png';
+                  }}
+                />
+                <div>
+                  <p className="font-medium text-gray-800">REF: {item.REF}</p>
+                  <p className="text-sm text-gray-600">
+                    Category: {item.subcategoryID?.name || 'N/A'}
+                  </p>
+                  <div className="flex items-center gap-4 mt-1">
+                    <p className="text-sm text-gray-600">
+                      Quantity: <span className="font-semibold">{item.quantity}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Price: <span className="font-semibold">{item.price} MAD</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-lg font-semibold text-gray-800">${(item.price * item.quantity).toFixed(2)}</p>
+            <div className="flex items-center">
+              <p className="text-lg font-semibold text-blue-800">
+                {(item.price * item.quantity).toFixed(2)} MAD
+              </p>
+            </div>
           </div>
         ))}
       </div>
 
-      <h3 className="text-lg font-bold text-right mt-4 text-blue-900">Total: ${total.toFixed(2)}</h3>
+      <div className="mt-4 border-t pt-4">
+        <h3 className="text-xl font-bold text-right text-blue-900">
+          Total: {total.toFixed(2)} MAD
+        </h3>
+      </div>
 
       {/* Pagination Controls */}
       {cart.length > itemsPerPage && (
@@ -70,3 +99,4 @@ function Summary({ cart }: any) {
 }
 
 export default Summary;
+//hi 
