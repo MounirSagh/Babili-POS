@@ -3,6 +3,7 @@ import Cart from '../components/Cart';
 import Listings from '../components/Listings';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 function Home() {
   const navigate = useNavigate();
@@ -13,6 +14,14 @@ function Home() {
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('');
   const [search, setSearch] = useState<string>('');
+  const { user, isLoaded } = useUser(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
   
   // Fetch all products
   const fetchProducts = async () => {

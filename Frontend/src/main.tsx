@@ -1,15 +1,17 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { BrowserRouter as Router } from 'react-router-dom';
-import NavBar from './components/NavBar';
+import { ClerkProvider } from '@clerk/clerk-react'
 
 
-createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Router>    
+    <ClerkProvider publishableKey='pk_test_cHJvdWQtc2FsbW9uLTkzLmNsZXJrLmFjY291bnRzLmRldiQ' afterSignOutUrl="/">
+      <Router>    
         <App />
-    </Router>
+      </Router>
+    </ClerkProvider>
   </StrictMode>,
-)
+);

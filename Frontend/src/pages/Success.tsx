@@ -1,8 +1,17 @@
-import React from 'react';
+import { useUser } from '@clerk/clerk-react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Success() {
   const navigate = useNavigate();
+  const { user, isLoaded } = useUser(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
 
   return (
     <div className="relative h-[800px] w-full overflow-hidden">

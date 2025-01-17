@@ -68,7 +68,7 @@ function DayEndSummary() {
       link.remove();
 
       // Navigate back to initial page
-      navigate('/');
+      navigate('/initial');
     } catch (error) {
       console.error('Error ending day:', error);
       setError(error instanceof Error ? error.message : 'Failed to end day');

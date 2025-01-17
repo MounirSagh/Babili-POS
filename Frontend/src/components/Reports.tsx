@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 interface DayReport {
   _id: string;
@@ -23,9 +25,20 @@ interface DayReport {
 }
 
 function Reports() {
+  const navigate = useNavigate();
   const [reports, setReports] = useState<DayReport[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user, isLoaded } = useUser(); 
+
+  useEffect(() => {
+    if (isLoaded && user?.publicMetadata?.role !== 'admin') {
+      navigate('/');
+    }
+  }, [isLoaded, user, navigate]);
+
+
 
   useEffect(() => {
     if (selectedDate) {
@@ -68,6 +81,35 @@ function Reports() {
     }
   };
 
+  const handleEndDay = async () => {
+    try {
+      // First get the daily summary
+      const summaryResponse = await axios.post('http://localhost:3000/api/order/end-day');
+      console.log('Day ended successfully:', summaryResponse.data);
+
+      // Generate report
+      const reportResponse = await axios.get(`http://localhost:3000/api/order/download-report`, {
+        params: { date: new Date().toISOString() },
+        responseType: 'blob'
+      });
+
+      // Download the report
+      const url = window.URL.createObjectURL(new Blob([reportResponse.data as BlobPart]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `report-${new Date().toISOString().split('T')[0]}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Navigate back to initial page
+      navigate('/initial');
+    } catch (error) {
+      console.error('Error ending day:', error);
+      setError(error instanceof Error ? error.message : 'Failed to end day');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
@@ -84,6 +126,19 @@ function Reports() {
           >
             Download Report
           </button>
+          <button
+  onClick={handleEndDay}
+  className={`px-4 py-2 rounded-md text-white ${
+    reports.length > 0 && new Date(reports[0].date).toDateString() === new Date().toDateString()
+      ? 'bg-blue-800 hover:bg-blue-900'
+      : 'bg-gray-400 cursor-not-allowed'
+  }`}
+  disabled={
+    reports.length === 0 || new Date(reports[0].date).toDateString() !== new Date().toDateString()
+  }
+>
+  End Day
+</button>
         </div>
       </div>
 

@@ -6,20 +6,21 @@ import NotFound from './pages/NotFound';
 import Payment from './pages/Payment';
 import Success from './pages/Success';
 import Initial from './pages/Initial';
-import DayEndSummary from './components/DayEndSummary';
+import SignIn from './pages/Sign-In';
 import Reports from './components/Reports';
 
 function App() {
   return (
     <div className="bg-gray-100 h-screen">
       <Header />
-      <main className="">
+      <main>
         <Routes>
-        <Route path="/" element={<Initial />} />
+          <Route path="/" element={<SignIn />} /> {/* Updated default route */}
+          <Route path="/initial" element={<Initial />} /> {/* Moved Initial to a separate route */}
           <Route path="/home" element={<Home />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/success" element={<Success />} />
-          <Route path="/day-end" element={<DayEndSummary />} />
+          <Route path="/sign-in" element={<SignIn />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -29,4 +30,3 @@ function App() {
 }
 
 export default App;
-
